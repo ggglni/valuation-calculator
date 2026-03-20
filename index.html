@@ -1,323 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Startup Valuation Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0d0d0d;
-    --surface: #141414;
-    --border: #2a2a2a;
-    --accent: #c8f562;
-    --accent-dim: rgba(200, 245, 98, 0.12);
-    --text: #f0ede8;
-    --muted: #666;
-    --red: #ff5e5e;
-    --blue: #5eb8ff;
-    --radius: 4px;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  .wrapper {
-    width: 100%;
-    max-width: 680px;
-  }
-
-  /* Header */
-  .header {
-    margin-bottom: 3rem;
-  }
-  .header .label {
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-  .header h1 {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 300;
-    line-height: 1.1;
-    color: var(--text);
-  }
-  .header h1 em {
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  /* Toggle */
-  .mode-toggle {
-    display: flex;
-    gap: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 4px;
-    margin-bottom: 2rem;
-    width: fit-content;
-  }
-  .mode-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.5rem 1.2rem;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-  .mode-btn.active {
-    background: var(--accent);
-    color: #0d0d0d;
-    font-weight: 500;
-  }
-
-  /* Card */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .field-group {
-    display: grid;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .field label {
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .input-row:focus-within {
-    border-color: var(--accent);
-  }
-
-  .currency-prefix {
-    background: #1e1e1e;
-    border-right: 1px solid var(--border);
-    padding: 0.75rem 1rem;
-    font-size: 0.8rem;
-    color: var(--muted);
-    user-select: none;
-  }
-
-  .input-row input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    padding: 0.75rem 1rem;
-  }
-  .input-row input::placeholder { color: #444; }
-
-  .unit-select {
-    background: #1e1e1e;
-    border-left: 1px solid var(--border);
-    border-right: none;
-    border-top: none;
-    border-bottom: none;
-    outline: none;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    padding: 0.75rem 0.8rem;
-    cursor: pointer;
-    appearance: none;
-  }
-
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 2rem 0;
-  }
-
-  /* Results */
-  .results-label {
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  .results-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .result-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.2rem 1.4rem;
-    position: relative;
-    transition: border-color 0.3s, transform 0.3s;
-  }
-  .result-box.highlight {
-    border-color: var(--accent);
-    background: var(--accent-dim);
-  }
-  .result-box .rb-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.4rem;
-  }
-  .result-box .rb-value {
-    font-family: 'Fraunces', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .result-box.highlight .rb-value {
-    color: var(--accent);
-  }
-  .result-box .rb-sub {
-    font-size: 0.65rem;
-    color: var(--muted);
-    margin-top: 0.4rem;
-  }
-  .result-box .badge {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.7rem;
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    background: var(--accent);
-    color: #0d0d0d;
-    padding: 2px 6px;
-    border-radius: 2px;
-    font-weight: 500;
-  }
-
-  /* Equity row */
-  .equity-row {
-    margin-top: 1rem;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .equity-row .eq-label {
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .equity-bar-wrap {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .equity-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 99px;
-    transition: width 0.5s cubic-bezier(.22,1,.36,1);
-    width: 0%;
-  }
-  .equity-pct {
-    font-family: 'Fraunces', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--accent);
-    min-width: 60px;
-    text-align: right;
-  }
-
-  /* Formula note */
-  .formula-note {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 1rem 1.2rem;
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .formula-note strong {
-    color: var(--text);
-    font-weight: 500;
-  }
-  .formula-note .formula {
-    color: var(--accent);
-    display: block;
-    margin-top: 0.3rem;
-    font-size: 0.8rem;
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 2rem 1rem;
-    color: var(--muted);
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-  }
-
-  /* Animation */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .result-box, .equity-row {
-    animation: fadeUp 0.35s ease both;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Valuation Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -380,16 +68,20 @@
     <span class="formula" id="formula-display">Post-money = Pre-money + Round</span>
     <span id="formula-desc" style="display:block; margin-top:0.2rem;">Enter the pre-money valuation and round size to calculate the post-money and investor equity stake.</span>
   </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Built by <a href="https://github.com/ggglni" target="_blank" rel="noopener">ggglni</a>
+  </footer>
 </div>
 
 <script>
-  let mode = 'pre'; // 'pre' → conosco pre-money | 'post' → conosco post-money
+  let mode = 'pre';
 
   function setMode(m) {
     mode = m;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
     document.getElementById('known-label').textContent = m === 'pre' ? 'Pre-money Valuation' : 'Post-money Valuation';
-    // Update formula
     if (m === 'pre') {
       document.getElementById('formula-display').textContent = 'Post-money = Pre-money + Round';
       document.getElementById('formula-desc').textContent = 'Enter the pre-money valuation and round size to calculate the post-money and investor equity stake.';
@@ -470,7 +162,6 @@
       </div>
     `;
 
-    // Animate bars
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const eb = document.getElementById('eq-bar');
