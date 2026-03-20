@@ -329,3 +329,19 @@ body {
 .result-box, .equity-row {
   animation: fadeUp 0.35s ease both;
 }
+
+/* Optional field tag */
+.optional-tag {
+  color: #444;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+/* Equity note */
+.equity-note {
+  margin-top: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-align: right;
+  letter-spacing: 0.04em;
+}

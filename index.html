@@ -52,6 +52,15 @@
         </div>
       </div>
 
+      <!-- Founder ownership (optional) -->
+      <div class="field">
+        <label>Founder Ownership Before This Round <span class="optional-tag">— optional</span></label>
+        <div class="input-row">
+          <input type="number" id="founder-pre" placeholder="e.g. 80   (leave blank if first round)" min="0" max="100" oninput="calculate()" style="padding-left:1rem;">
+          <span class="currency-prefix" style="border-left:1px solid var(--border); border-right:none;">%</span>
+        </div>
+      </div>
+
     </div>
 
     <div class="divider"></div>
@@ -131,8 +140,19 @@
       return;
     }
 
-    const pct = post > 0 ? (round / post) * 100 : 0;
-    const founderPct = 100 - pct;
+    const investorPct = post > 0 ? (round / post) * 100 : 0;
+
+    // Founder dilution: optional field
+    const founderPreRaw = parseFloat(document.getElementById('founder-pre').value);
+    const hasFounderPre = !isNaN(founderPreRaw) && founderPreRaw >= 0 && founderPreRaw <= 100;
+    const founderPrePct = hasFounderPre ? founderPreRaw : 100;
+    // After this round: existing ownership diluted by new investor slice
+    const founderPostPct = founderPrePct * (1 - investorPct / 100);
+
+    const founderLabel = hasFounderPre ? '% Founders (after dilution)' : '% Founders';
+    const founderNote = hasFounderPre
+      ? `${founderPrePct.toFixed(1)}% → ${founderPostPct.toFixed(1)}% after this round`
+      : 'Assumes first round (100% pre)';
 
     section.innerHTML = `
       <p class="results-label">Results</p>
@@ -151,23 +171,24 @@
         </div>
       </div>
       <div class="equity-row">
-        <span class="eq-label">% Investors</span>
+        <span class="eq-label">% Investors (this round)</span>
         <div class="equity-bar-wrap"><div class="equity-bar" id="eq-bar"></div></div>
-        <span class="equity-pct">${pct.toFixed(1)}%</span>
+        <span class="equity-pct">${investorPct.toFixed(1)}%</span>
       </div>
       <div class="equity-row" style="margin-top:0.5rem">
-        <span class="eq-label">% Founders</span>
+        <span class="eq-label">${founderLabel}</span>
         <div class="equity-bar-wrap"><div class="equity-bar" id="founder-bar" style="background:#5eb8ff"></div></div>
-        <span class="equity-pct" style="color:#5eb8ff">${founderPct.toFixed(1)}%</span>
+        <span class="equity-pct" style="color:#5eb8ff">${founderPostPct.toFixed(1)}%</span>
       </div>
+      <p class="equity-note">${founderNote}</p>
     `;
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const eb = document.getElementById('eq-bar');
         const fb = document.getElementById('founder-bar');
-        if (eb) eb.style.width = Math.min(pct, 100) + '%';
-        if (fb) fb.style.width = Math.min(founderPct, 100) + '%';
+        if (eb) eb.style.width = Math.min(investorPct, 100) + '%';
+        if (fb) fb.style.width = Math.min(founderPostPct, 100) + '%';
       });
     });
   }
